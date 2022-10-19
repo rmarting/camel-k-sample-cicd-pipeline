@@ -1,0 +1,68 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-config-pro
+  labels:
+    app: postgresql-pro
+data:
+  POSTGRESQL_DATABASE: postgresdb
+  POSTGRESQL_USER: postgresadmin
+  POSTGRESQL_PASSWORD: admin123
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pg-pv-pro-claim
+  labels:
+    app: postgresql-pro
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql-pro
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql-pro
+  template:
+    metadata:
+      labels:
+        app: postgresql-pro
+    spec:
+      containers:
+        - name: postgresql-pro
+          image: image-registry.openshift-image-registry.svc:5000/openshift/postgresql@sha256:ea0f98821926d8e59395e365e3bace6c04aef9ee3ec7140897bcb851ae848ccd
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgresql-config-pro
+          volumeMounts:
+            - mountPath: /var/lib/pgsql/data
+              name: postgresql-pro
+      volumes:
+        - name: postgresql-pro
+          persistentVolumeClaim:
+            claimName: pg-pv-pro-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-pro
+  labels:
+    app: postgresql-pro
+spec:
+  type: ClusterIP
+  ports:
+   - port: 5432
+  selector:
+   app: postgresql-pro

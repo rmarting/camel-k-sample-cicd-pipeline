@@ -1,0 +1,25 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: execute-test
+  description: Execute some end-to-end or smoke tests
+spec:
+  params:
+    - name: script
+      description: The script to execute
+    - name: integration-name
+      description: The integration name to test
+    - name: namespace
+      description: The namespace where we want to test
+    - name: host
+      description: The host where we want to test
+  workspaces:
+  - name: source
+  steps:
+  - name: test
+    # use any image containing the tooling required by your test
+    image: alpine/curl
+    script: |
+      cd $(workspaces.source.path)
+      $(params.script) $(params.integration-name).$(params.namespace).$(params.host)

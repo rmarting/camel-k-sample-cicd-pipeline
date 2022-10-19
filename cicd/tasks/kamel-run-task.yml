@@ -1,0 +1,29 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: kamel-run
+  description: Run an integration with Camel K CLI (kamel)
+spec:
+  params:
+    - name: integration-name
+      description: The name of the integration
+    - name: integration-file
+      description: The integration source we want to run
+    - name: namespace
+      description: The namespace where to run the integration
+  results:
+    - name: integration-name
+      description: The name of the integration    
+  workspaces:
+  - name: source
+  steps:
+  - name: run
+    # The container provides the kamel binary we need
+    image: docker.io/apache/camel-k:1.10.1
+    script: |
+      cd $(workspaces.source.path)
+      # Run the integration and let's use the output to scrape the integration name
+      # We need to use the --wait option in order to wait until the Integration is running
+      kamel_output=$(kamel run $(params.integration-file) --name $(params.integration-name) -n $(params.namespace) --wait)
+      echo $kamel_output | grep -oP 'Integration ".*?" (updated|created)' | awk -F ' ' '{print $2}' | sed "s/\"//g" | tr -d '\n' | tee $(results.integration-name.path)

@@ -1,0 +1,21 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: kamel-promote
+  description: Promote an Integration to an higher environment
+spec:
+  params:
+    - name: integration-name
+      description: The integration we want to promote
+    - name: from
+      description: The namespace source
+    - name: to
+      description: The namespace destination           
+  workspaces:
+  - name: source
+  steps:
+  - name: promote
+    image: docker.io/apache/camel-k:1.10.1
+    script: |      
+      kamel promote $(params.integration-name) -n $(params.from) --to $(params.to) -V

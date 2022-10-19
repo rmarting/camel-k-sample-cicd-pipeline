@@ -1,0 +1,35 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+    generateName: kamel-k-cicd-pipelinerun-1-8-0-
+spec:
+  pipelineRef:
+    name: kamel-k-cicd-pipeline
+  taskRunSpecs:
+    - pipelineTaskName: kamel-promote
+      taskServiceAccountName: camel-k-operator
+  workspaces:
+  - name: shared-data
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  params:
+  - name: repo-url
+    value: https://github.com/rmarting/camel-k-sample-cicd-pipeline.git
+  - name: repo-branch
+    value: main
+  - name: integration-name
+    value: rest-postgresql-camel-k-route
+  - name: integration-file
+    value: rest-postgresql-camel-k-route-1.8.0.yml
+  - name: namespace-dev
+    value: kamel-dev
+  - name: namespace-pro
+    value: kamel-pro
+  - name: host
+    value: svc.cluster.local

@@ -1,0 +1,113 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: kamel-k-cicd-pipeline
+spec:
+  description: | 
+    CICD pipeline for a Camel K Integration Microservice
+  params:
+  - name: repo-url
+    type: string
+    description: The git repo URL to clone from
+  - name: repo-branch
+    type: string
+    description: The git repo branch
+  - name: integration-name
+    type: string
+    description: The integration name
+  - name: integration-file
+    type: string
+    description: The file with the integration to build, deploy, and promote
+  - name: namespace-dev
+    type: string
+    description: Namespace identified for development
+  - name: namespace-pro
+    type: string
+    description: Namespace identified for production
+  - name: host
+    type: string
+    description: The host where to test the integration
+  workspaces:
+  - name: shared-data
+    description: | 
+      This workspace contains the cloned repo files, so they can be read by the
+      next task.
+  tasks:
+  # Clone repo
+  - name: fetch-source
+    taskRef:
+      name: git-clone
+      kind: ClusterTask
+    workspaces:
+    - name: output
+      workspace: shared-data
+    params:
+    - name: url
+      value: $(params.repo-url)
+    - name: revision
+      value: $(params.repo-branch)
+  # Run in development environment
+  - name: kamel-run
+    runAfter: ["fetch-source"]
+    taskRef:
+      name: kamel-run
+    workspaces:
+    - name: source
+      workspace: shared-data
+    params:
+      - name: integration-name
+        value: $(params.integration-name)
+      - name: integration-file
+        value: $(params.integration-file)
+      - name: namespace
+        value: $(params.namespace-dev)
+  # E2E in development environment
+  - name: e2e-test
+    runAfter: ["kamel-run"]
+    taskRef:
+      name: execute-test
+    workspaces:
+    - name: source
+      workspace: shared-data
+    params:
+      - name: script
+        value: test/e2e-test.sh
+      - name: integration-name
+        value: $(tasks.kamel-run.results.integration-name)
+      - name: namespace
+        value: $(params.namespace-dev)
+      - name: host
+        value: $(params.host)
+  # Promote to production
+  - name: kamel-promote
+    runAfter: ["e2e-test"]
+    taskRef:
+      name: kamel-promote
+    workspaces:
+    - name: source
+      workspace: shared-data
+    params:
+      - name: integration-name
+        value: $(tasks.kamel-run.results.integration-name)
+      - name: from
+        value: $(params.namespace-dev)
+      - name: to
+        value: $(params.namespace-pro)
+  # Smoke test in the production environment
+  - name: smoke-test
+    runAfter: ["kamel-promote"]
+    taskRef:
+      name: execute-test
+    workspaces:
+    - name: source
+      workspace: shared-data
+    params:
+      - name: script
+        value: test/smoke-test.sh    
+      - name: integration-name
+        value: $(tasks.kamel-run.results.integration-name)
+      - name: namespace
+        value: $(params.namespace-pro)
+      - name: host
+        value: $(params.host)
