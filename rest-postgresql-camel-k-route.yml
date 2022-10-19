@@ -6,16 +6,16 @@
 
 - rest:
     get:
-      - to: "direct:get"
-        path: "/customers/{name}"
-      - to: "direct:getall"
-        path: "/customers/"
+      - path: "/customers/{name}"
+        to: "direct:get"
+      - path: "/customers/"
+        to: "direct:getall"        
     post:
-      - to: "direct:post"
-        path: "/customers/"
+      - path: "/customers/"
+        to: "direct:post"        
     delete:
-      - to: "direct:delete"
-        path: "/customers/{name}"
+      - path: "/customers/{name}"
+        to: "direct:delete"        
 
 - from:
     uri: "direct:getall"
@@ -24,6 +24,8 @@
           simple: "select * from customers"
       - to: log:info
       - to: jdbc:camel
+      - marshal:
+          json: {}      
       - set-body:
           simple: "${bodyAs(String)}"
 
@@ -34,6 +36,8 @@
           simple: "select * from customers where name='${header.name}'"
       - to: log:info
       - to: jdbc:camel
+      - marshal:
+          json: {}      
       - set-body:
           simple: "${bodyAs(String)}"
 
