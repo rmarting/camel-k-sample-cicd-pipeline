@@ -24,7 +24,7 @@ This project requires an Red Hat OpenShift Container Platform available. If you 
 not have one, you could use one of the following resources to deploy locally one:
 
 * [Camel CLI 1.10](https://camel.apache.org/camel-k/1.10.x/cli/cli.html)
-* [Tekton CLI ]()
+* Tekton CLI
 * [CodeReady Containers - OpenShift 4 on your Laptop](https://github.com/code-ready/crc)
 
 This repo was tested with the following latest versions of Kamel CLI and
