@@ -11,7 +11,7 @@ the following features:
 This repository implements a simple CICD pipeline to promote an integration
 route from a _development_ environment to a _production_ environment.
 
-![Camel K CICD pipeline](./img/camel-k-cicd-pipeline.png)
+![Camel K CICD pipeline](./img/came-k-cicd-pipeline.png)
 
 The sample integration route is a REST API to insert, select and delete records
 from a table in a database.
