@@ -24,6 +24,7 @@ This project requires an Red Hat OpenShift Container Platform available. If you 
 not have one, you could use one of the following resources to deploy locally one:
 
 * [Camel CLI 1.10](https://camel.apache.org/camel-k/1.10.x/cli/cli.html)
+* [Tekton CLI ]()
 * [CodeReady Containers - OpenShift 4 on your Laptop](https://github.com/code-ready/crc)
 
 This repo was tested with the following latest versions of Kamel CLI and
@@ -32,6 +33,11 @@ CodeReady Containers:
 ```shell
 ❯ kamel version
 Camel K Client 1.10.1
+❯ tkn version
+Client version: 0.24.0
+Pipeline version: v0.37.4
+Triggers version: v0.20.2
+Operator version: v0.60.1
 ❯ crc version
 CRC version: 2.10.1+426703d
 OpenShift version: 4.11.7
@@ -43,6 +49,11 @@ Podman version: 4.2.0
 Download the right binary of your platform from the
 [GitHub Releases](https://github.com/apache/camel-k/releases/tag/v1.10.1),
 and install in the command path of your system.
+
+### Installing Tekton CLI
+
+Please, follow the instructions
+[here](https://docs.openshift.com/container-platform/4.11/cli_reference/tkn_cli/installing-tkn.html).
 
 ### Starting CodeReady Containers
 
